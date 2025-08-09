@@ -41,6 +41,8 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	l.skipWhitespace()
+
 	switch l.char {
 	case '=':
 		tok = newToken(token.ASSIGN, l.char)
@@ -61,6 +63,18 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+	default:
+		if isLetter(l.char) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.char) {
+			tok.Type = token.INT
+			tok.Literal = l.readNumber()
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.char)
+		}
 	}
 
 	l.readChar()
@@ -69,4 +83,39 @@ func (l *Lexer) NextToken() token.Token {
 
 func newToken(tokenType token.TokenType, char byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(char)}
+}
+
+/*
+Reads in an identifier and advances our lexer’s positions until it encounters a non-letter-character
+*/
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.char) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func isLetter(char byte) bool {
+	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'
+}
+
+func (l *Lexer) skipWhitespace() {
+	for l.char == ' ' || l.char == '\t' || l.char == '\n' || l.char == '\r' {
+		l.readChar()
+	}
+}
+
+func (l *Lexer) readNumber() string {
+	//TODO: generalize this by passing in the character-identifying functions as arguments.
+	//TODO: make Monkey suport floats, hex and octal notation optional.
+	positon := l.position
+	for isDigit(l.char) {
+		l.readChar()
+	}
+	return l.input[positon:l.position]
+}
+
+func isDigit(char byte) bool {
+	return '0' <= char && char <= '9'
 }

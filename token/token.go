@@ -32,3 +32,18 @@ const (
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
 )
+
+var keywords = map[string]TokenType{"fn": FUNCTION, "let": LET}
+
+func LookupIdent(ident string) TokenType {
+	/*
+		We can use ; to make an assingment-statement in the if
+		We search in keywords with key ident
+		tok gets that value
+		ok is a boolean that is true if the value is found, false otherwise
+	*/
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+	return IDENT
+}

@@ -8,7 +8,7 @@ import (
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
 func TestNextToken(t *testing.T) {
-	input := `let five = 5:
+	input := `let five = 5;
 	let ten = 10;
 	
 	let add = fn(x, y) {
