@@ -1,6 +1,8 @@
 package lexer
 
-import "monkey/token"
+import (
+	"monkey/token"
+)
 
 type Lexer struct {
 	input        string
@@ -45,7 +47,13 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.char {
 	case '=':
-		tok = newToken(token.ASSIGN, l.char)
+		if l.peekChar() == '=' {
+			char := l.char
+			l.readChar()
+			tok = token.Token{Type: token.EQ, Literal: string(char) + string(l.char)}
+		} else {
+			tok = newToken(token.ASSIGN, l.char)
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.char)
 	case '(':
@@ -60,6 +68,24 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.COMMA, l.char)
 	case '+':
 		tok = newToken(token.PLUS, l.char)
+	case '-':
+		tok = newToken(token.MINUS, l.char)
+	case '!':
+		if l.peekChar() == '=' {
+			char := l.char
+			l.readChar()
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(char) + string(l.char)}
+		} else {
+			tok = newToken(token.BANG, l.char)
+		}
+	case '/':
+		tok = newToken(token.SLASH, l.char)
+	case '*':
+		tok = newToken(token.ASTERISK, l.char)
+	case '<':
+		tok = newToken(token.LT, l.char)
+	case '>':
+		tok = newToken(token.GT, l.char)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -118,4 +144,12 @@ func (l *Lexer) readNumber() string {
 
 func isDigit(char byte) bool {
 	return '0' <= char && char <= '9'
+}
+
+func (l *Lexer) peekChar() byte { //We only want to “peek” ahead in the input and not move around in it
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
 }
